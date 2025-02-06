@@ -15,39 +15,43 @@ protocol OverlayWindowManageable {
 
 final class OverlayWindowManager: OverlayWindowManageable {
     
-    private var overlayWindow: NSWindow?
+    private var overlayWindows: [NSWindow] = []
     
     func showOverlay() {
-        if overlayWindow == nil {
-            createOverlayWindow()
+        if overlayWindows.isEmpty {
+            createOverlayWindows()
         }
-        overlayWindow?.orderFront(nil)
+        overlayWindows.forEach { $0.orderFront(nil) }
     }
     
     func hideOverlay() {
-        overlayWindow?.orderOut(nil)
+        overlayWindows.forEach { $0.orderOut(nil) }
     }
     
-    private func createOverlayWindow() {
-        let screenFrame = NSScreen.main?.frame ?? .zero
-        overlayWindow = NSWindow(
-            contentRect: screenFrame,
-            styleMask: .borderless,
-            backing: .buffered,
-            defer: false
-        )
+    private func createOverlayWindows() {
+        overlayWindows.removeAll()
         
-        overlayWindow?.backgroundColor = NSColor.clear
-        overlayWindow?.isOpaque = false
-        overlayWindow?.hasShadow = false
-        overlayWindow?.level = .screenSaver
-        overlayWindow?.ignoresMouseEvents = true
-        
-        let overlayView = NSView(frame: screenFrame)
-        overlayView.wantsLayer = true
-        overlayView.layer?.borderWidth = 8
-        overlayView.layer?.borderColor = NSColor.red.cgColor
-        
-        overlayWindow?.contentView = overlayView
+        for screen in NSScreen.screens {
+            let overlayWindow = NSWindow(
+                contentRect: screen.frame,
+                styleMask: .borderless,
+                backing: .buffered,
+                defer: false
+            )
+            
+            overlayWindow.backgroundColor = NSColor.clear
+            overlayWindow.isOpaque = false
+            overlayWindow.hasShadow = false
+            overlayWindow.level = .screenSaver
+            overlayWindow.ignoresMouseEvents = true
+            
+            let overlayView = NSView(frame: screen.frame)
+            overlayView.wantsLayer = true
+            overlayView.layer?.borderWidth = 8
+            overlayView.layer?.borderColor = NSColor.red.cgColor
+            
+            overlayWindow.contentView = overlayView
+            overlayWindows.append(overlayWindow)
+        }
     }
 }
