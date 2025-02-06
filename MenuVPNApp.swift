@@ -11,14 +11,11 @@ import SwiftUI
 struct MenuVPNApp: App {
     private var vpnController = VPNController(overlayManager: OverlayWindowManager())
     
-    
     var body: some Scene {
         MenuBarExtra("", systemImage: vpnController.isActive ? "circle.fill" : "circle") {
             Button(vpnController.isActive ? "Stop VPN" : "Start VPN", action: toggleVPN)
             Divider()
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
+            Button("Quit", action: quit)
         }
     }
     
@@ -26,5 +23,9 @@ struct MenuVPNApp: App {
         Task {
             await vpnController.toggleVPN()
         }
+    }
+    
+    func quit() {
+        NSApplication.shared.terminate(nil)
     }
 }
